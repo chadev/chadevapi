@@ -15,6 +15,8 @@ use Rack::Cors do |config|
 end
 
 get '/lunches' do
+  content_type :json
+
   lunch_hashes = Meetup.events.map { |json| Event.new(json) }.map(&:to_h)
   lunch_hashes.to_json
 end
