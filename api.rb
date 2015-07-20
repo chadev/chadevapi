@@ -5,7 +5,13 @@ require 'json'
 require 'rack/cors'
 require 'dalli'
 
-set :cache, Dalli::Client.new
+set :cache, Dalli::Client.new(
+  (ENV['MEMCACHEDCLOUD_SERVERS'] || "").split(","),
+  { username: ENV["MEMCACHEDCLOUD_USERNAME"],
+    password: ENV["MEMCACHEDCLOUD_PASSWORD"],
+    failover: true
+  }
+)
 
 BASE_URL = "https://api.meetup.com/"
 API_KEY  = ENV.fetch('MEETUP_API_KEY')
