@@ -3,6 +3,9 @@ require 'sinatra'
 require 'net/http'
 require 'json'
 require 'rack/cors'
+require 'dalli'
+
+set :cache, Dalli::Client.new
 
 BASE_URL = "https://api.meetup.com/"
 API_KEY  = ENV.fetch('MEETUP_API_KEY')
@@ -17,8 +20,10 @@ end
 get '/lunches' do
   content_type :json
 
-  lunch_hashes = Meetup.events.map { |json| Event.new(json) }.map(&:to_h)
-  lunch_hashes.to_json
+  lunches = settings.cache.fetch('lunches', 3600) do
+    lunch_hashes = Meetup.events.map { |json| Event.new(json) }.map(&:to_h)
+    lunch_hashes.to_json
+  end
 end
 
 class Meetup
